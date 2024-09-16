@@ -1,0 +1,37 @@
+[theme]
+base="light"
+primaryColor="#f18f01"
+font="serif"
+layout="wide"
+hideTopBar = true
+
+
+[server]
+# Enables support for Cross-Origin Resource Sharing (CORS) protection, for
+# added security.
+# Due to conflicts between CORS and XSRF, if `server.enableXsrfProtection` is
+# on and `server.enableCORS` is off at the same time, we will prioritize
+# `server.enableXsrfProtection`.
+# Default: true
+enableCORS = true
+
+# Enables support for Cross-Site Request Forgery (XSRF) protection, for added
+# security.
+# Due to conflicts between CORS and XSRF, if `server.enableXsrfProtection` is
+# on and `server.enableCORS` is off at the same time, we will prioritize
+# `server.enableXsrfProtection`.
+# Default: true
+enableXsrfProtection = false
+
+# Max size, in megabytes, for files uploaded with the file_uploader.
+# Default: 200
+maxUploadSize = 10
+
+# Max size, in megabytes, of messages that can be sent via the WebSocket
+# connection.
+# Default: 200
+maxMessageSize = 10
+
+# Enables support for websocket compression.
+# Default: false
+enableWebsocketCompression = false
