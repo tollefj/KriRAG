@@ -3,9 +3,14 @@
 Code for the paper titled:
 *Enhancing Criminal Investigation Analysis with Summarization and Memory-based Retrieval-Augmented Generation: A Comprehensive Evaluation of Real Case Data*
 
+Results from manual evaluation are found in the [experiments](experiments/) directory.
+
+**Note: This study discusses case files that contain unsettling information and language pertaining to violent crimes.**
+
 ![KriRAG UI](assets/1.png)
 ![KriRAG UI and config](assets/2.png)
 ![KriRAG UI and output](assets/3.png)
+![KriRAG UI and output](assets/4.png)
 
 
 ## Installation
@@ -37,8 +42,6 @@ streamlit run ui.py
 ```
 
 Otherwise, feel free to inspect the source code in `src`.
-
-
 
 ### Environment variables
 
