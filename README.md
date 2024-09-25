@@ -26,8 +26,8 @@ With CUDA:
 `pip install torch`
 
 ```bash
+# places cache and models in the same directory, allowing for easy offline usage.
 make install
-make download  # places cache and models in the same directory, allowing for easy offline usage.
 ```
 
 You need to download an LLM of choice and run it using the llama.cpp library, or with any other library supporting the same open-ai like API.
