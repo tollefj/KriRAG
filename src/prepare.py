@@ -7,7 +7,6 @@ from chromadb import PersistentClient
 from chromadb.types import Collection
 from chromadb.utils.batch_utils import create_batches
 
-# show dot variables
 from pandas import DataFrame
 
 from utils.chroma import get_client
@@ -45,13 +44,11 @@ def populate(
         embedding_model=embedding_model,
         collection_name=collection_name,
     )
-    # check if collection size > 0
     if collection.count() == 0:
         document_meta = []
         meta_text = "Adding metadata..."
         meta_bar = st.progress(0, text=meta_text)
         for percent_complete, row in enumerate(data):
-            # just a dummy filter on > 10 words.
             document_meta.append(
                 {
                     "document": row["id"],
@@ -64,7 +61,6 @@ def populate(
             meta_bar.progress(current_perc)
         meta_bar.empty()
 
-        # update key if you store your data with other fields
         documents = [d["text"] for d in data]
 
         with st.spinner("Computing embeddings..."):
@@ -91,7 +87,6 @@ def populate(
         for i, e, m, d in batches:
             collection.add(i, e, m, d)
 
-    # mem cleanup
     del embedding_model
     torch.cuda.empty_cache()
 
