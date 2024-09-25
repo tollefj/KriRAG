@@ -85,7 +85,7 @@ def run_rag(
                     if len(QUERY_MEMORY) > 0:
                         prev_info = pred(
                             instruction=memory_prompt.format(
-                                QUERY_MEMORY=QUERY_MEMORY,
+                                previous_information=QUERY_MEMORY,
                                 query=query,
                                 DOC_ID=DOC_ID,
                             ),
