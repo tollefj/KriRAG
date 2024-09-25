@@ -36,13 +36,7 @@ st.markdown(
 )
 
 st.title("KriRAG")
-# st.markdown("#### query-based analysis for criminal investigations")
 subtext = "query-based analysis for criminal investigations"
-# nicer html-formatted off-green color:
-# st.markdown(
-#     f'<p style="color:#4CAF50;">{subtext}</p>',
-#     unsafe_allow_html=True,
-# )
 st.markdown(f"**{subtext}**")
 st.divider()
 
@@ -61,13 +55,9 @@ df = DataFrame()
 
 try:
     with col1:
-
-        # selection box between Folder and File upload
         st.write("### Data:")
         st.write("Select between a case folder or document upload")
 
-        # concat "" and file option keys:
-        # _options = [""] + list(file_options.values())
         _options = list(file_options.values())
         file_option = st.selectbox(
             label="Select data source",
