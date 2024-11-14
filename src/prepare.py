@@ -1,3 +1,14 @@
+# ------------------------------------------------------------------------------
+# File: prepare.py
+# Description: data preparation for chroma db
+#
+# License: Apache License 2.0
+# For license details, refer to the LICENSE file in the project root.
+#
+# Contributors:
+# - Tollef Jørgensen (Initial Development, 2024)
+# ------------------------------------------------------------------------------
+
 import os
 from typing import Dict, List, Tuple
 
@@ -6,7 +17,6 @@ import torch
 from chromadb import PersistentClient
 from chromadb.types import Collection
 from chromadb.utils.batch_utils import create_batches
-
 from pandas import DataFrame
 
 from utils.chroma import get_client

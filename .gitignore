@@ -1,8 +1,10 @@
 # custom stuff:
+*.tar
 chroma
 secret
 output
-models
+llms
+src/models/EMBEDDING_MODEL
 # .gitignore
 
 # Byte-compiled / optimized / DLL files

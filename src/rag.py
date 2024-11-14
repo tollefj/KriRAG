@@ -1,3 +1,13 @@
+# ------------------------------------------------------------------------------
+# File: rag.py
+# Description: rag pipeline for KriRAG
+#
+# License: Apache License 2.0
+# For license details, refer to the LICENSE file in the project root.
+#
+# Contributors:
+# - Tollef Jørgensen (Initial Development, 2024)
+# ------------------------------------------------------------------------------
 import os
 import re
 from datetime import datetime
@@ -7,8 +17,8 @@ import jsonlines
 import streamlit as st
 from chromadb.types import Collection
 
-from config.llm_config import memory_prompt, question_and_reason_prompt
-from src.llm import ask_llm, parse_llm_output, pred
+from llm import ask_llm, parse_llm_output, pred
+from llm_config import memory_prompt, question_and_reason_prompt
 from utils.batch_util import get_sentence_batches
 from utils.chroma import get_matching_documents
 

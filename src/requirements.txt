@@ -1,0 +1,7 @@
+python-dotenv
+pandas
+nltk
+jsonlines
+streamlit
+chromadb
+# git+https://github.com/chroma-core/chroma.git

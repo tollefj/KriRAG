@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Tuple
 
 import pandas as pd
 
-from src.llm import pred
+from llm import pred
 
 MIN_TOKENS: int = 100  # min summary tokens
 MAX_TOKENS: int = 2000  # output tokens

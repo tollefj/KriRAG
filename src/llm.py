@@ -1,12 +1,22 @@
+# ------------------------------------------------------------------------------
+# File: llm.py
+# Description: llm tools for KriRAG. Relies on a openai-comptaible api, default through llama.cpp server docker container.
+#
+# License: Apache License 2.0
+# For license details, refer to the LICENSE file in the project root.
+#
+# Contributors:
+# - Tollef Jørgensen (Initial Development, 2024)
+# ------------------------------------------------------------------------------
+
 import json
 import re
 
 import requests
 
-HOSTNAME = "10.0.0.22"  # endre til f.eks. localhost
-HOSTNAME = "localhost"  # endre til f.eks. localhost
-PORT = 8080
-url = f"http://{HOSTNAME}:{PORT}/completion"  # llama.cpp server
+HOSTNAME = "0.0.0.0"
+PORT = 8000
+url = f"http://{HOSTNAME}:{PORT}/completions/v1"  # llama.cpp server
 headers = {"Content-Type": "application/json"}
 
 schema = {

@@ -1,0 +1,19 @@
+# https://hub.docker.com/r/semitechnologies/transformers-inference/tags?page=3
+FROM semitechnologies/transformers-inference:sentence-transformers-all-MiniLM-L6-v2-latest
+
+WORKDIR /app
+
+# dependencies (only runs when requirements.txt changes)
+COPY src/requirements.txt /app/
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
+
+COPY src/ /app
+RUN python3 install.py
+
+# Copy the rest of the application code (this step will not trigger install.py re-execution)
+
+# Streamlit port expose and run
+EXPOSE 8501
+HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
+
+ENTRYPOINT ["streamlit", "run", "ui.py", "--server.port=8501", "--server.address=0.0.0.0"]

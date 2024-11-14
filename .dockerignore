@@ -1,0 +1,7 @@
+*.gguf
+llms
+assets
+data
+experiments
+src/chroma
+src/output
