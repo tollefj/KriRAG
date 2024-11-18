@@ -1,7 +1,21 @@
-# Docker setup
+# setup
 
-1. download the correct llama-cpp docker image: `python docker/download-llamacpp.py`. This saves it as a tar file, for offline sharing.
-2. run the llama-cpp container by `./docker/run-llama.cpp.sh`. This will host it using the current ip.
+## docker llm server:
+
+`make docker`
+
+## local llm:
+
+```bash
+git clone git@github.com:ggerganov/llama.cpp.git
+
+```
+
+```bash
+docker build -f docker/krirag-onnx-multiplatform.dockerfile -t krirag:latest .
+docker save -o krirag.tar krirag:latest
+docker load -i krirag.tar
+```
 
 # Notater
 

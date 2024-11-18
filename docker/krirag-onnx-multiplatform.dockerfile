@@ -1,16 +1,15 @@
-# https://hub.docker.com/r/semitechnologies/transformers-inference/tags?page=3
-FROM semitechnologies/transformers-inference:sentence-transformers-all-MiniLM-L6-v2-latest
+# https://hub.docker.com/r/semitechnologies/transformers-inference/tags?name=sentence-transformers
+# download specific images for either ARM64 or AMD64 (w/ CUDA support)
+# ARM64: 0.69GB, AMD64: 5.97GB
+FROM semitechnologies/transformers-inference:sentence-transformers-all-MiniLM-L6-v2-onnx
 
 WORKDIR /app
 
-# dependencies (only runs when requirements.txt changes)
 COPY src/requirements.txt /app/
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
 COPY src/ /app
 RUN python3 install.py
-
-# Copy the rest of the application code (this step will not trigger install.py re-execution)
 
 # Streamlit port expose and run
 EXPOSE 8501
