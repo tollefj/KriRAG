@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DEFAULT_MODEL="llms/gemma-2-9b-it-Q5_K_M.gguf"
-DEFAULT_MODEL="llms/qwen2.5-1.5b-instruct-q5_k_m.gguf"
+# DEFAULT_MODEL="llms/qwen2.5-1.5b-instruct-q5_k_m.gguf"
 
 # Check for model argument
 if [ -z "$1" ]; then
@@ -22,7 +22,7 @@ fi
 
 echo "Loading Docker image from $IMAGE_FILE..."
 docker load -i "$IMAGE_FILE" || {
-  echo "Docker load failed"
+  echo "Docker load failed!"
   exit 1
 }
 
@@ -32,7 +32,7 @@ if [ "$OSTYPE" == "Darwin" ]; then
 elif [ "$OSTYPE" == "Linux" ]; then
   HOST_IP=$(hostname -I | awk '{print $1}')
 else
-  HOST_IP = "localhost"
+  HOST_IP="localhost"
 fi
 
 PORT=8000
@@ -43,6 +43,9 @@ echo "server is running on $HOST_IP:$PORT"
 echo "ssh: ssh <user>@$HOST_IP"
 echo "web: http://$HOST_IP:$PORT"
 
-docker run -v "$MODELS_DIR:/models" -p 8000:8000 \
-  ghcr.io/ggerganov/llama.cpp:server -m "/models/$MODEL_FILE" \
+docker run -v "$MODELS_DIR:/models" \
+  -p "$PORT:$PORT" \
+  --gpus all \
+  local/llama.cpp:server-cuda \
+  -m "~/LLM_STORE\gemma-2-9b-it-Q5_K_M.gguf" \
   --port $PORT -n $CTX_LEN -ngl $GPU_LAYERS

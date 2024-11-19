@@ -16,3 +16,7 @@ docker:
 	chmod +x docker/02-run-llama.cpp.sh
 	./docker/01-download-llama.cpp.sh
 	./docker/02-run-llama.cpp.sh
+
+NEWEST_UPDATE:
+	mkdir llms
+	echo "Move your .gguf model to the llm folder: `mv path/to/your/model.gguf llms/`"

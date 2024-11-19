@@ -4,6 +4,7 @@ chroma
 secret
 output
 llms
+llama.cpp/
 src/models/EMBEDDING_MODEL
 # .gitignore
 
