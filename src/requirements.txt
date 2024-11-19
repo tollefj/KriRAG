@@ -1,3 +1,5 @@
+torch
+sentence-transformers
 python-dotenv
 pandas
 nltk

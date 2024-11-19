@@ -35,7 +35,7 @@ known_safetensor_huggingface = ["intfloat", "google-bert"]
 def download_model(
     repo_id,
     save_path,
-    output_dir="./src/models",
+    output_dir="models",
     ignore_patterns=ignore_patterns,
 ):
     print(f"Attempting to download {repo_id}")
@@ -70,8 +70,8 @@ def install(custom_environments: List[str] = []):
     init_dotenv(custom_environments)
 
     print("Downloading nltk libs...")
-    nltk.download("punkt", download_dir="src/models")
-    nltk.download("punkt_tab", download_dir="src/models")
+    nltk.download("punkt", download_dir="models")
+    nltk.download("punkt_tab", download_dir="models")
 
     for env_path in ["EMBEDDING_MODEL"]:
         print(f"Downloading {env_path}...")

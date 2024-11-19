@@ -14,9 +14,6 @@ import re
 
 import requests
 
-HOSTNAME = "0.0.0.0"
-PORT = 8000
-url = f"http://{HOSTNAME}:{PORT}/completions/v1"  # llama.cpp server
 headers = {"Content-Type": "application/json"}
 
 schema = {
@@ -73,6 +70,8 @@ schemas = {
 
 def pred(
     instruction,
+    ip_address: str,
+    port: int,
     max_tokens=1000,
     use_schema: str = "default",
     temp=0.0,  # temperature. 0: deterministic, 1+: random
@@ -82,6 +81,7 @@ def pred(
     # top_k=40,  # consider top k tokens at each generation step
     evaluate: bool = False,  # apply eval
 ):
+    url = f"http://{ip_address}:{port}/completion"  # llama.cpp server
     if len(instruction) == 0:
         raise ValueError("Instruction cannot be empty")
 
@@ -128,6 +128,8 @@ def parse_llm_output(response: str):
 def ask_llm(
     query: str,
     text: str,
+    ip_address: str,
+    port: int,
     extra: str = "",
     doc_id: str = "ID",
     temp: float = 0.0,
@@ -152,6 +154,8 @@ def ask_llm(
 
     output = pred(
         instruction=instruction,
+        ip_address=ip_address,
+        port=port,
         temp=temp,
         max_tokens=tokens,
         use_schema="default",

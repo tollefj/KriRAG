@@ -1,25 +1,19 @@
 [theme]
-base="light"
-primaryColor="#f18f01"
-font="serif"
-layout="wide"
+base = "light"
+primaryColor = "#f18f01"
+font = "serif"
+
+[ui]
 hideTopBar = true
 
-
+[browser]
+gatherUsageStats = false
 
 [server]
-browser.gatherUsageStats = false
-enableCORS = false  # Disable CORS since the proxy handles it
-enableXsrfProtection = true  # Secure requests if needed
-baseUrlPath = ""  # Adjust this if the app is served under a subpath
-
-# Enables support for Cross-Site Request Forgery (XSRF) protection, for added
-# security.
-# Due to conflicts between CORS and XSRF, if `server.enableXsrfProtection` is
-# on and `server.enableCORS` is off at the same time, we will prioritize
-# `server.enableXsrfProtection`.
-# Default: true
-enableXsrfProtection = false
+# browser.gatherUsageStats = false
+enableCORS = false           # Disable CORS since the proxy handles it
+enableXsrfProtection = false # Secure requests if needed
+baseUrlPath = ""             # Adjust this if the app is served under a subpath
 
 # Max size, in megabytes, for files uploaded with the file_uploader.
 # Default: 200

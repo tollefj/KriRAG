@@ -22,7 +22,13 @@ from initialize import load_documents, load_single_document
 from prepare import initialize, populate
 from rag import run_rag
 
-st.set_page_config(page_title="KriRAG")
+import zipfile
+from datetime import datetime
+import os
+import json
+import pandas as pd
+
+st.set_page_config(page_title="KriRAG", layout="wide")
 
 default_queries = [
     "persons with residence and connections to the address (the crime scene) as owner, tenant, visitor, etc.",
@@ -48,6 +54,16 @@ st.markdown(
 
 st.title("KriRAG")
 subtext = "query-based analysis for criminal investigations"
+st.sidebar.header("Server Configuration")
+ip_address = st.sidebar.text_input("IP Address of API", value="127.0.0.1")
+port = st.sidebar.number_input("API Port", value=8502, step=1)
+
+# Add listeners for changes
+if st.sidebar.button("Update Configuration"):
+    st.session_state.ip_address = ip_address
+    st.session_state.port = port
+    st.success(f"Configuration updated to IP: {ip_address}, Port: {port}")
+
 st.markdown(f"**{subtext}**")
 st.divider()
 
@@ -148,6 +164,8 @@ if is_initialized and query_area_exists:
             rag_path = run_rag(
                 queries=queries,
                 collection=collection,
+                ip_address=ip_address,
+                port=port,
                 lang="en",
                 top_n=top_n,
                 llm_ctx_len=8168,
@@ -155,12 +173,35 @@ if is_initialized and query_area_exists:
             )
 
         with st.spinner("Processing findings..."):
-            meta = meta_summary(rag_path)
+            meta = meta_summary(rag_path, ip_address=ip_address, port=port)
             st.write("### Meta-summary of queries:")
             for m_id, meta_dict in enumerate(meta):
                 st.write(f"Query: {meta_dict['query']}")
                 st.write(f"{meta_dict['summary']}")
                 st.divider()
 
-        st.info(f"Analysis Complete! You can find the files in `{rag_path}`")
+        st.info(f"Analysis Complete! Download the CSV below.")
         rag_started = False
+
+        
+        all_data = []
+        for file in sorted(os.listdir(rag_path)):
+            if file.endswith(".jsonl"):
+                file_path = os.path.join(rag_path, file)
+                with open(file_path, "r") as f:
+                    for line in f:
+                        data = json.loads(line)
+                        data["id"] = file
+                        all_data.append(data)
+        df = pd.DataFrame(all_data)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        csv_path = os.path.join(rag_path, "combined_results.csv")
+        df.to_csv(csv_path, index=False)
+
+        with open(csv_path, "rb") as f:
+            st.download_button(
+            label="Download Results",
+            data=f,
+            file_name=f"{collection_name.replace(' ', '_')}_{timestamp}.csv",
+            mime="text/csv",
+            )

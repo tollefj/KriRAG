@@ -26,11 +26,16 @@ from utils.chroma import get_matching_documents
 def run_rag(
     queries: List[str],
     collection: Collection,
+    ip_address: str,
+    port: int,
     lang: str = "en",
     top_n: int = 10,
     llm_ctx_len: int = 8168,
     new_tokens: int = 2048,
 ) -> str:
+    # print all locals that rag is running with:
+    print(locals())
+    
     start_of_program: str = datetime.now().strftime("%Y%m%d-%H%M%S")
     _metadata: List[dict] = collection.get()["metadatas"]
     _documents: set = set([d["document"] for d in _metadata])
@@ -99,6 +104,8 @@ def run_rag(
                                 query=query,
                                 DOC_ID=DOC_ID,
                             ),
+                            ip_address=ip_address,
+                            port=port,
                             max_tokens=1000,
                             use_schema="summary",
                         )
@@ -112,6 +119,8 @@ def run_rag(
                     llm_output = ask_llm(
                         query=query,
                         text=full_text,
+                        ip_address=ip_address,
+                        port=port,
                         extra=prev_info,
                         doc_id=DOC_ID,
                         tokens=new_tokens,

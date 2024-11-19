@@ -11,11 +11,16 @@ run:
 # after installing nvidia-container-toolkit
 # https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
 
-docker:
-	chmod +x docker/01-download-llama.cpp.sh
-	chmod +x docker/02-run-llama.cpp.sh
-	./docker/01-download-llama.cpp.sh
-	./docker/02-run-llama.cpp.sh
+server:
+	chmod +x docker/download.sh
+	chmod +x docker/serve.sh
+	./docker/download.sh
+	./docker/serve.sh
+
+frontend:
+	docker build -t krirag -f krirag.dockerfile .
+	docker run -p 8501:8501 krirag
+
 
 NEWEST_UPDATE:
 	mkdir llms

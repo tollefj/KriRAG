@@ -1,20 +1,34 @@
 # setup
 
-## docker llm server:
-
-`make docker`
-
-## local llm:
+## server (docker)
 
 ```bash
-git clone git@github.com:ggerganov/llama.cpp.git
-
+./docker/build.server.sh  # clones llama.cpp and builds from cuda dockerfile
+./docker/run.server.sh
 ```
 
+## frontend
+
+### local installation
+
 ```bash
-docker build -f docker/krirag-onnx-multiplatform.dockerfile -t krirag:latest .
-docker save -o krirag.tar krirag:latest
-docker load -i krirag.tar
+cd src
+python -m pip install -r requirements.txt
+python install.py
+streamlit run ui.py
+```
+
+### docker
+
+./docker/build.ui.sh
+./docker/run.ui.sh
+
+
+```bash
+docker network create krirag-net
+#12029ebae1b1b18d4dabc105500e33fd8e57ddddbe0dadc733e451aa5ceb470b
+
+
 ```
 
 # Notater
