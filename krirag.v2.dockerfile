@@ -1,5 +1,6 @@
 FROM nvidia/cuda:12.1.0-cudnn8-devel-ubuntu22.04
 LABEL maintainer="tollefj"
+WORKDIR /app
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Update and install necessary packages
@@ -20,12 +21,10 @@ RUN [ ${#PYTORCH} -gt 0 ] && VERSION='torch=='$PYTORCH'.*' ||  VERSION='torch'; 
     python3 -m pip install --no-cache-dir -U $VERSION --extra-index-url https://download.pytorch.org/whl/$CUDA
 
 COPY src/requirements.txt /app/
-RUN python3 -m pip install --no-cache-dir -r /app/requirements.txt && \
-    rm /app/requirements.txt
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
 COPY src/ /app
-RUN python3 /app/install.py && \ rm /app/install.py
-RUN rm -rf /root/.cache
+RUN python3 install.py
 
 EXPOSE 8501
 CMD ["bash", "-c", "streamlit run /app/ui.py"]
