@@ -17,8 +17,13 @@ import jsonlines
 import streamlit as st
 from chromadb.types import Collection
 
-from llm import ask_llm, parse_llm_output, pred
-from llm_config import memory_prompt, question_and_reason_prompt
+from llm import (
+    ask_llm,
+    memory_prompt,
+    parse_llm_output,
+    pred,
+    question_and_reason_prompt,
+)
 from utils.batch_util import get_sentence_batches
 from utils.chroma import get_matching_documents
 
@@ -35,7 +40,7 @@ def run_rag(
 ) -> str:
     # print all locals that rag is running with:
     print(locals())
-    
+
     start_of_program: str = datetime.now().strftime("%Y%m%d-%H%M%S")
     _metadata: List[dict] = collection.get()["metadatas"]
     _documents: set = set([d["document"] for d in _metadata])

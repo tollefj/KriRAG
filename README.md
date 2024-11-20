@@ -23,7 +23,6 @@ streamlit run ui.py
 ./docker/build.ui.sh
 ./docker/run.ui.sh
 
-
 ```bash
 docker network create krirag-net
 #12029ebae1b1b18d4dabc105500e33fd8e57ddddbe0dadc733e451aa5ceb470b

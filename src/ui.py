@@ -14,6 +14,12 @@ from utils.generic import init_dotenv, init_sqlite
 init_dotenv()
 init_sqlite()
 
+import json
+import os
+import zipfile
+from datetime import datetime
+
+import pandas as pd
 import streamlit as st
 from pandas import DataFrame
 
@@ -21,12 +27,6 @@ from combine import meta_summary
 from initialize import load_documents, load_single_document
 from prepare import initialize, populate
 from rag import run_rag
-
-import zipfile
-from datetime import datetime
-import os
-import json
-import pandas as pd
 
 st.set_page_config(page_title="KriRAG", layout="wide")
 
@@ -183,7 +183,6 @@ if is_initialized and query_area_exists:
         st.info(f"Analysis Complete! Download the CSV below.")
         rag_started = False
 
-        
         all_data = []
         for file in sorted(os.listdir(rag_path)):
             if file.endswith(".jsonl"):
@@ -200,8 +199,8 @@ if is_initialized and query_area_exists:
 
         with open(csv_path, "rb") as f:
             st.download_button(
-            label="Download Results",
-            data=f,
-            file_name=f"{collection_name.replace(' ', '_')}_{timestamp}.csv",
-            mime="text/csv",
+                label="Download Results",
+                data=f,
+                file_name=f"{collection_name.replace(' ', '_')}_{timestamp}.csv",
+                mime="text/csv",
             )
