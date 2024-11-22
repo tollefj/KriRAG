@@ -23,9 +23,8 @@ else
   echo "No stopped container named $CONTAINER_NAME found."
 fi
 
-
 MODEL_PATH="/models/gemma-2-9b-it-Q5_K_M.gguf"
-NGPU="100"   # Number of GPU layers, just max it at 100
+NGPU="100" # Number of GPU layers, just max it at 100
 N_CONTEXT_LEN="4096"
 
 # Run the Llama.cpp server
