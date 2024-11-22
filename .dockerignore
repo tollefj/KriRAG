@@ -5,3 +5,7 @@ data
 experiments
 src/chroma
 src/output
+src/temp
+chroma
+output
+temp

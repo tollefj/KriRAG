@@ -9,26 +9,23 @@
 # - Tollef Jørgensen (Initial Development, 2024)
 # ------------------------------------------------------------------------------
 
-from utils.generic import init_dotenv, init_sqlite
+# keep these at the top
+import dotenv
+import streamlit as st
 
-init_dotenv()
-init_sqlite()
+st.set_page_config(page_title="KriRAG", layout="wide")
+dotenv.load_dotenv()
 
+# remaining imports...
 import json
 import os
-import zipfile
 from datetime import datetime
 
 import pandas as pd
-import streamlit as st
-from pandas import DataFrame
 
 from combine import meta_summary
-from initialize import load_documents, load_single_document
-from prepare import initialize, populate
+from initialize import load_and_cache_documents, populate_collection
 from rag import run_rag
-
-st.set_page_config(page_title="KriRAG", layout="wide")
 
 default_queries = [
     "persons with residence and connections to the address (the crime scene) as owner, tenant, visitor, etc.",
@@ -37,9 +34,6 @@ default_queries = [
     "the victim's involvement in conflict or argument prior to death",
 ]
 
-##############################################
-# STREAMLIT APP
-##############################################
 # css hack to remove top header
 st.markdown(
     """
@@ -55,7 +49,7 @@ st.markdown(
 st.title("KriRAG")
 subtext = "query-based analysis for criminal investigations"
 st.sidebar.header("Server Configuration")
-ip_address = st.sidebar.text_input("IP Address of API", value="127.0.0.1")
+ip_address = st.sidebar.text_input("LLM Docker Name or IP Address", value="krirag-api")
 port = st.sidebar.number_input("API Port", value=8502, step=1)
 
 # Add listeners for changes
@@ -67,70 +61,43 @@ if st.sidebar.button("Update Configuration"):
 st.markdown(f"**{subtext}**")
 st.divider()
 
-is_initialized = False
 query_area_exists = False
 col1, col2 = st.columns(2)
 
-file_options = {
-    "file": "File upload (txt)",
-    "folder": "Folder location",
-}
-file_options_inv = {v: k for k, v in file_options.items()}
+initialization = {}
 
+if "is_initialized" not in st.session_state:
+    st.session_state.is_initialized = False
+if "rag_started" not in st.session_state:
+    st.session_state.rag_started = False
+if "last_top_n" not in st.session_state:
+    st.session_state["last_top_n"] = 1
 
-df = DataFrame()
+with col1:
+    st.write("### Data:")
+    txt_upload = "Upload a single .txt file or a zip of multiple .txt files. The file names should have identifiable names for KriRAG to reference results."
 
-try:
-    with col1:
-        st.write("### Data:")
-        st.write("Select between a case folder or document upload")
+    _uploaded = st.file_uploader(txt_upload, type=["txt", "zip"], accept_multiple_files=False)
+        
+    if _uploaded:
+        initialization = load_and_cache_documents(_uploaded)
 
-        _options = list(file_options.values())
-        file_option = st.selectbox(
-            label="Select data source",
-            options=_options,
-            placeholder="Select...",
-            index=0,
-        )
-
-        if file_option == file_options["folder"]:
-            df = load_documents(
-                st.text_input(
-                    "Location of case files:",
-                )
-            )
-
-        elif file_option == file_options["file"]:
-            _uploaded = st.file_uploader("Upload a file", type=["txt"])
-            if _uploaded:
-                _uploaded = _uploaded.read().decode("utf-8")
-                _uploaded = _uploaded.split("\n")
-                df = load_single_document(_uploaded)
-
-        if not df.empty:
-            initialization = initialize(df)
-            data = initialization["data"]
-
-            is_initialized = True
-
-    with col2:
-        st.markdown("### Queries:")
-        if not is_initialized:
-            st.warning("Please select data source first.")
-        else:
+        with col2:
+            st.markdown("### Queries:")
             query_area = st.text_area(
                 "Your queries (one per line):",
                 "\n\n".join(default_queries),
                 height=400,
                 key="queries",
             )
-            query_area_exists = True
 
-except FileNotFoundError as e:
-    st.error(f"Error: {e}")
+        print(initialization.keys())
+        print(f"Initialization complete.\nData size: {initialization['num_pages']} pages, {initialization['num_sents']} sentences.")
+        st.session_state.is_initialized = True
 
 st.divider()
-if is_initialized and query_area_exists:
+
+if st.session_state.is_initialized and "data" in initialization:
     to_delete = st.checkbox(
         "Delete previously computed data (local database)",
         value=False,
@@ -149,17 +116,18 @@ if is_initialized and query_area_exists:
         min(initialization["num_pages"], 100),
         1,
     )
+    if st.session_state.get("last_top_n") != top_n:
+        st.session_state["last_top_n"] = top_n
+
     st.write(
         "Note: a higher slider value will increase processing time, but will likely find more relevant documents."
     )
 
-    rag_started = False
-    btn = st.button("Run KriRAG", disabled=rag_started)
-    if btn:
-        rag_started = True
+    if st.button("Run KriRAG", disabled=st.session_state.rag_started):
+        st.session_state.rag_started = True
         with st.spinner("Analyzing..."):
-            _, collection = populate(
-                data, collection_name=collection_name, delete=to_delete
+            _, collection = populate_collection(
+                initialization["data"], collection_name=collection_name, delete=to_delete
             )
             rag_path = run_rag(
                 queries=queries,
@@ -171,7 +139,6 @@ if is_initialized and query_area_exists:
                 llm_ctx_len=8168,
                 new_tokens=4096,
             )
-
         with st.spinner("Processing findings..."):
             meta = meta_summary(rag_path, ip_address=ip_address, port=port)
             st.write("### Meta-summary of queries:")
@@ -181,7 +148,7 @@ if is_initialized and query_area_exists:
                 st.divider()
 
         st.info(f"Analysis Complete! Download the CSV below.")
-        rag_started = False
+        st.session_state.rag_started = False
 
         all_data = []
         for file in sorted(os.listdir(rag_path)):
@@ -192,10 +159,10 @@ if is_initialized and query_area_exists:
                         data = json.loads(line)
                         data["id"] = file
                         all_data.append(data)
-        df = pd.DataFrame(all_data)
+        results_df = pd.DataFrame(all_data)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         csv_path = os.path.join(rag_path, "combined_results.csv")
-        df.to_csv(csv_path, index=False)
+        results_df.to_csv(csv_path, index=False)
 
         with open(csv_path, "rb") as f:
             st.download_button(

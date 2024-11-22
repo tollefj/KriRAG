@@ -22,6 +22,4 @@ else
   echo "No stopped container named $CONTAINER_NAME found."
 fi
 
-
-
-docker run --name $CONTAINER_NAME --network krirag-net -p 8501:8501 krirag-ui
+docker run --gpus all --name $CONTAINER_NAME --network krirag-net -p 8501:8501 krirag-ui

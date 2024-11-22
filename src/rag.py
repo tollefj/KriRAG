@@ -24,7 +24,7 @@ from llm import (
     pred,
     question_and_reason_prompt,
 )
-from utils.batch_util import get_sentence_batches
+from utils.batch import get_sentence_batches
 from utils.chroma import get_matching_documents
 
 
