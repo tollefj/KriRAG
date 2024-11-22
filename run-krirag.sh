@@ -1,19 +1,34 @@
 #!/bin/bash
 if [ ! -d ~/LLM_STORE ] || [ -z "$(ls -A ~/LLM_STORE/*.gguf 2>/dev/null)" ]; then
     echo "Error: ~/LLM_STORE does not exist or contains no .gguf LLM files."
-    echo "Download and place a .gguf in ~/LLM_STORE and update the variable "MODEL_NAME" (in $(run-krirag.sh)) accordingly."
+    echo "Download and place a .gguf in ~/LLM_STORE and pass it as the first argument, or update the default model in the run script."
     exit 1
 else
     echo "Found .gguf files in ~/LLM_STORE:"
     ls -1 ~/LLM_STORE/*.gguf
 fi
 
-MODEL_NAME="gemma-2-9b-it-Q5_K_M"
-
-if ! docker network ls | grep -q krirag-net; then
-    # let containers communicate between each other, but limit complete outside internet access
-    docker network create --driver bridge --internal --subnet 10.1.1.0/24 krirag-net-isolated
+MODEL_NAME=${1:-"gemma-2-2b-it-Q6_K.gguf"}  # gemma is default. first user arg is the model name otherwise.
+# check if MODEL_NAME exists in ~/LLM_STORE
+if [ ! -f ~/LLM_STORE/$MODEL_NAME ]; then
+    echo "Error: $MODEL_NAME not found in ~/LLM_STORE."
+    exit 1
 fi
+
+if [ -f api.tar ] && [ -f ui.tar ]; then
+    echo "Loading offline docker images..."
+    FILESIZE_GB=$(du -h api.tar | cut -f1)
+    echo "Loading API ($FILESIZE_GB)..."
+    docker load -i api.tar
+    FILESIZE_GB=$(du -h ui.tar | cut -f1)
+    echo "Loading UI ($FILESIZE_GB)..."
+    docker load -i ui.tar
+else
+    echo "Error: api.tar/ui.tar not found."
+    exit 1
+fi
+
+docker network create krirag-net
 
 cleanup_container() {
     local CONTAINER_NAME=$1
@@ -31,29 +46,24 @@ cleanup_container() {
 
 API_NAME="krirag-api"
 UI_NAME="krirag-ui"
-MODEL_PATH="/models/$MODEL_NAME.gguf"
 NGPU="100" # Number of GPU layers, just max it at 100
 N_CONTEXT_LEN="4096"
-USER="toffdock"
-
-docker pull $USER/krirag-api
-docker pull $USER/krirag-ui
 
 cleanup_container $API_NAME
 docker run -d \
     --gpus all \
     --name $API_NAME \
-    --network krirag-net-isolated \
+    --network krirag-net \
     -p 8502:8502 \
     -v ~/LLM_STORE:/models \
-    $USER/krirag-api \
-    -m "$MODEL_PATH" \
+    krirag-api \
+    -m "models/$MODEL_NAME" \
     --port 8502 -n $N_CONTEXT_LEN -ngl $NGPU
 
 cleanup_container $UI_NAME
 docker run \
     --gpus all \
     --name $UI_NAME \
-    --network krirag-net-isolated \
+    --network krirag-net \
     -p 8501:8501 \
-    $USER/krirag-ui
+    krirag-ui

@@ -12,19 +12,18 @@ from sentence_transformers import SentenceTransformer
 
 from utils.chroma import get_client
 
-EMBEDDING_MODEL = "intfloat/multilingual-e5-base"
+EMBEDDING_MODEL = "sbert"
 LANG = "english"
 
 valid_exts = [".txt", ".json", ".jsonl"]
 
-# https://huggingface.co/intfloat/multilingual-e5-base/discussions/24
-pr_number = 24
 with st.spinner("Loading SentenceTransformer model..."):
     embedding_model = SentenceTransformer(
         EMBEDDING_MODEL,
-        revision=f"refs/pr/{pr_number}",
         backend="openvino",  # we optimize cpu-inference to reduce docker container image (w/ cuda drivers etc.)
+        local_files_only=True,
     )
+
 
 def load_documents(
     doc_path: str,
@@ -45,7 +44,7 @@ def load_documents(
     df = pd.DataFrame(parsed_data)
     return df
 
-    
+
 def load_txt_from_folder(folder_path: str, lang: str = LANG) -> pd.DataFrame:
     # walk all files in the directory!
     parsed_data = []
@@ -120,7 +119,6 @@ def load_and_cache_documents(uploaded_file):
         "num_pages": num_pages,
         "num_sents": num_sents,
     }
-
 
 
 def populate_collection(

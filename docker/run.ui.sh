@@ -1,6 +1,6 @@
 #!/bin/bash
 # docker load -i docker/krirag-ui.tar
-CONTAINER_NAME="krirag-frontend"
+CONTAINER_NAME="krirag-ui"
 
 if ! docker network ls | grep -q krirag-net; then
   docker network create krirag-net

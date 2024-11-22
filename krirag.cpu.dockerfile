@@ -12,7 +12,5 @@ RUN python3 -m pip install --no-cache-dir -r requirements.cpu.txt \
     --extra-index-url https://download.pytorch.org/whl/cpu
 
 COPY src/ /app
-RUN python3 install.py
-
 EXPOSE 8501
 CMD ["bash", "-c", "streamlit run ui.py"]
