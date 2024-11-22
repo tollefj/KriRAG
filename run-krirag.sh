@@ -28,13 +28,15 @@ cleanup_container() {
     fi
 }
 
-# docker load -i docker/api.tar
-# docker load -i docker/ui.tar
-
 API_NAME="krirag-api"
+UI_NAME="krirag-ui"
 MODEL_PATH="/models/$MODEL_NAME.gguf"
 NGPU="100"   # Number of GPU layers, just max it at 100
 N_CONTEXT_LEN="4096"
+USER="toffdock"
+
+docker pull $USER/krirag-api
+docker pull $USER/krirag-ui
 
 cleanup_container $API_NAME
 docker run -d \
@@ -43,15 +45,14 @@ docker run -d \
     --network krirag-net \
     -p 8502:8502 \
     -v ~/LLM_STORE:/models \
-    $API_NAME \
+    $USER/krirag-api \
     -m "$MODEL_PATH" \
     --port 8502 -n $N_CONTEXT_LEN -ngl $NGPU \
 
-UI_NAME="krirag-ui"
 cleanup_container $UI_NAME
 docker run \
     --gpus all \
     --name $UI_NAME \
     --network krirag-net \
     -p 8501:8501 \
-    $UI_NAME
+    $USER/krirag-ui
