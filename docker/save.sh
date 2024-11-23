@@ -1,3 +1,8 @@
 #!/bin/bash
-docker save -o docker/api.tar krirag-api
-docker save -o docker/ui.tar krirag-ui
+if [ ! -f api.tar ]; then
+    docker save -o api.tar krirag-api
+fi
+
+if [ ! -f ui.tar ]; then
+    docker save -o ui.tar krirag-ui
+fi

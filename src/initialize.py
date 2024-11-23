@@ -1,4 +1,5 @@
 import os
+import shutil
 import zipfile
 from typing import Dict, List, Tuple
 
@@ -25,26 +26,6 @@ with st.spinner("Loading SentenceTransformer model..."):
     )
 
 
-def load_documents(
-    doc_path: str,
-    lang: str = LANG,
-) -> pd.DataFrame:
-    # iterate all files in the folder
-    doc_paths = []
-    for _file in os.listdir(doc_path):
-        if _file.endswith(tuple(valid_exts)):
-            doc_paths.append(os.path.join(doc_path, _file))
-
-    parsed_data = []
-    for dp in doc_paths:
-        with open(dp, "r", encoding="utf-8") as f:
-            _doc = f.readlines()
-            parsed_data.extend(parse_document(_doc, lang))
-
-    df = pd.DataFrame(parsed_data)
-    return df
-
-
 def load_txt_from_folder(folder_path: str, lang: str = LANG) -> pd.DataFrame:
     # walk all files in the directory!
     parsed_data = []
@@ -59,14 +40,18 @@ def load_txt_from_folder(folder_path: str, lang: str = LANG) -> pd.DataFrame:
 
 
 def load_single_document(docs: List[str], lang: str = LANG) -> pd.DataFrame:
-    # docs is a list of strings/sentences
     parsed_data = parse_document(docs, lang)
     df = pd.DataFrame(parsed_data)
     return df
 
 
-def parse_document(docs: List[str], lang: str = LANG) -> List[str]:
-    docs = [d.replace("\n", "") for d in docs]
+def parse_document(
+    docs: List[str],
+    lang: str = LANG,
+    strip_newlines: bool = False,
+) -> List[str]:
+    if strip_newlines:
+        docs = [d.replace("\n", "") for d in docs]
 
     def sentencize(text):
         return nltk.sent_tokenize(text, language=lang)
@@ -99,10 +84,12 @@ def load_and_cache_documents(uploaded_file):
     df = pd.DataFrame()
     if ext == "txt":
         uploaded_file = uploaded_file.read().decode("utf-8")
-        uploaded_file = uploaded_file.split("\n")
         df = load_single_document(uploaded_file)
     elif ext == "zip":
         with zipfile.ZipFile(uploaded_file, "r") as z:
+            # remove the temp folder if it exists
+            if os.path.exists("temp"):
+                shutil.rmtree("temp", ignore_errors=True)
             z.extractall("temp")
             df = load_txt_from_folder("temp")
 
