@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Tuple
 
 import pandas as pd
 
-from src.llm import pred
+from llm import pred
 
 MIN_TOKENS: int = 100  # min summary tokens
 MAX_TOKENS: int = 2000  # output tokens
@@ -15,7 +15,7 @@ processing_prompt: str = (
 )
 
 
-def process_case(case_jsonl_path: str) -> Tuple[str, Dict[str, Any]]:
+def process_case(case_jsonl_path: str, ip_address: str, port: int) -> Tuple[str, Dict[str, Any]]:
     doc_findings: List[Dict[str, Any]] = []
     with open(case_jsonl_path, "r", encoding="utf-8") as f:
         doc_findings = [json.loads(x) for x in f.readlines()]
@@ -34,16 +34,19 @@ def process_case(case_jsonl_path: str) -> Tuple[str, Dict[str, Any]]:
     text: str = "\n".join(summaries)
     instruction: str = processing_prompt.format(text=text, query=query)
     output: Dict[str, Any] = pred(
-        instruction, use_schema="findings", max_tokens=MAX_TOKENS, evaluate=True
+        instruction,
+        ip_address=ip_address,
+        port=port,
+        use_schema="findings", max_tokens=MAX_TOKENS, evaluate=True
     )
     return query, output
 
 
-def meta_summary(case_path: str) -> List[Dict[str, Any]]:
+def meta_summary(case_path: str, ip_address: str, port: int) -> List[Dict[str, Any]]:
     metas: List[Dict[str, Any]] = []
     for f in os.listdir(case_path):
         full_path: str = os.path.join(case_path, f)
-        query, processed = process_case(full_path)
+        query, processed = process_case(full_path, ip_address=ip_address, port=port)
         if "summary" in processed:
             metas.append(
                 {

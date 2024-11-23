@@ -1,12 +1,25 @@
+# ------------------------------------------------------------------------------
+# File: llm.py
+# Description: llm tools for KriRAG. Relies on a openai-comptaible api, default through llama.cpp server docker container.
+#
+# License: Apache License 2.0
+# For license details, refer to the LICENSE file in the project root.
+#
+# Contributors:
+# - Tollef Jørgensen (Initial Development, 2024)
+# ------------------------------------------------------------------------------
+
 import json
 import re
 
 import requests
 
-HOSTNAME = "10.0.0.22"  # endre til f.eks. localhost
-HOSTNAME = "localhost"  # endre til f.eks. localhost
-PORT = 8080
-url = f"http://{HOSTNAME}:{PORT}/completion"  # llama.cpp server
+question_and_reason_prompt = {
+    "en": "You are an AI assisting a criminal investigation, analyzing case files for knowledge discoveries. You follow strict logical and deductive reasoning, and will only present information for which you have a complete overview of. Do not make assumptions, or add any superfluous information. {extra}You receive a new document with ID {doc_id}: '{text}'. Investigate document {doc_id} grounded in the QUERY: '{query}'. Generate a JSON object with 1) questions: a list of investigative questions (based on e.g., objects, actions, events, entities) that are directly related to the QUERY in {doc_id}. 2) reason: discuss whether document {doc_id} answers the QUERY. 3) score: if the document is 0 irrelevant, 1 somewhat relevant, 2 relevant, or 3 extremely relevant. 4) a summary of vital details uncovered in {doc_id}.",
+}
+memory_prompt = "You are an AI assisting a criminal investigation, analyzing case files. You follow abductive reasoning and logic. Do not make assumptions, or add any superfluous information. From the following data:\n{previous_information}, create a summary of vital information related to the query: '{query}'. Make sure to reference the ID '{DOC_ID}' for your findings, and keep all previous document references."
+
+
 headers = {"Content-Type": "application/json"}
 
 schema = {
@@ -63,6 +76,8 @@ schemas = {
 
 def pred(
     instruction,
+    ip_address: str,
+    port: int,
     max_tokens=1000,
     use_schema: str = "default",
     temp=0.0,  # temperature. 0: deterministic, 1+: random
@@ -72,6 +87,7 @@ def pred(
     # top_k=40,  # consider top k tokens at each generation step
     evaluate: bool = False,  # apply eval
 ):
+    url = f"http://{ip_address}:{port}/completion"  # llama.cpp server
     if len(instruction) == 0:
         raise ValueError("Instruction cannot be empty")
 
@@ -118,11 +134,13 @@ def parse_llm_output(response: str):
 def ask_llm(
     query: str,
     text: str,
+    ip_address: str,
+    port: int,
     extra: str = "",
     doc_id: str = "ID",
     temp: float = 0.0,
     tokens: int = 150,
-    prompt_source: dict = None,  # which dict in "llm_config"
+    prompt_source: dict = None,  # see "question_and_reason_prompt" above.
     lang: str = "en",
     verbose: bool = False,
 ) -> dict:
@@ -142,6 +160,8 @@ def ask_llm(
 
     output = pred(
         instruction=instruction,
+        ip_address=ip_address,
+        port=port,
         temp=temp,
         max_tokens=tokens,
         use_schema="default",

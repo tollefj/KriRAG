@@ -1,8 +1,13 @@
 # custom stuff:
+.locks
+*.tar
 chroma
 secret
 output
-models
+llms
+llama.cpp/
+src/models/EMBEDDING_MODEL
+src/sbert
 # .gitignore
 
 # Byte-compiled / optimized / DLL files
@@ -107,9 +112,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .venv
-env/
 venv/
 ENV/
 env.bak/

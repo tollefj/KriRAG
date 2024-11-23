@@ -1,3 +1,13 @@
+# ------------------------------------------------------------------------------
+# File: rag.py
+# Description: rag pipeline for KriRAG
+#
+# License: Apache License 2.0
+# For license details, refer to the LICENSE file in the project root.
+#
+# Contributors:
+# - Tollef Jørgensen (Initial Development, 2024)
+# ------------------------------------------------------------------------------
 import os
 import re
 from datetime import datetime
@@ -7,20 +17,30 @@ import jsonlines
 import streamlit as st
 from chromadb.types import Collection
 
-from config.llm_config import memory_prompt, question_and_reason_prompt
-from src.llm import ask_llm, parse_llm_output, pred
-from utils.batch_util import get_sentence_batches
+from llm import (
+    ask_llm,
+    memory_prompt,
+    parse_llm_output,
+    pred,
+    question_and_reason_prompt,
+)
+from utils.batch import get_sentence_batches
 from utils.chroma import get_matching_documents
 
 
 def run_rag(
     queries: List[str],
     collection: Collection,
+    ip_address: str,
+    port: int,
     lang: str = "en",
     top_n: int = 10,
     llm_ctx_len: int = 8168,
     new_tokens: int = 2048,
 ) -> str:
+    # print all locals that rag is running with:
+    print(locals())
+
     start_of_program: str = datetime.now().strftime("%Y%m%d-%H%M%S")
     _metadata: List[dict] = collection.get()["metadatas"]
     _documents: set = set([d["document"] for d in _metadata])
@@ -89,6 +109,8 @@ def run_rag(
                                 query=query,
                                 DOC_ID=DOC_ID,
                             ),
+                            ip_address=ip_address,
+                            port=port,
                             max_tokens=1000,
                             use_schema="summary",
                         )
@@ -102,6 +124,8 @@ def run_rag(
                     llm_output = ask_llm(
                         query=query,
                         text=full_text,
+                        ip_address=ip_address,
+                        port=port,
                         extra=prev_info,
                         doc_id=DOC_ID,
                         tokens=new_tokens,
