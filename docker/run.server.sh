@@ -24,6 +24,9 @@ else
 fi
 
 MODEL_PATH="/models/gemma-2-9b-it-Q5_K_M.gguf"
+MODEL_PATH="/models/gemma-2-27b-it-Q5_K_M.gguf"
+MODEL_PATH="/models/Meta-Llama-3.1-8B-Instruct-Q5_K_M.gguf"
+MODEL_PATH="/models/Phi-3-medium-4k-instruct-Q5_K_M.gguf"
 NGPU="100" # Number of GPU layers, just max it at 100
 N_CONTEXT_LEN="4096"
 

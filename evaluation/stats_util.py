@@ -27,7 +27,7 @@ def get_keys(investigation: CASETYPE = "open-case") -> str:
 
 
 def load_truth(investigation: CASETYPE = "open-case") -> dict:
-    truth_path = f"data/ground_truth/{investigation}.csv"
+    truth_path = f"../data/ground_truth/{investigation}.csv"
     if investigation == "open-case":
         truth_df = pd.read_csv(truth_path, index_col=0).reset_index(drop=True)
     else:
@@ -118,13 +118,15 @@ def case_metrics(
 
     for folder in sorted(os.listdir(root_folder)):
         folder = os.path.join(root_folder, folder)
-        if not investigation.lower() in folder.lower() or not os.path.isdir(folder):
-            logger.warning(f"Skipping folder: {folder}")
-            continue
+        # if not investigation.lower() in folder.lower() or not os.path.isdir(folder):
+        # logger.warning(f"Skipping folder: {folder}")
+        # continue
         logger.info(f"Processing folder: {folder}")
         output_folder = folder
         llm_answers = {}
         for llm_output in os.listdir(output_folder):
+            if ".jsonl" not in llm_output:
+                continue
             llm_output_path = os.path.join(output_folder, llm_output)
             with open(llm_output_path, "r", encoding="utf-8") as f:
                 tmp = []

@@ -48,9 +48,10 @@ def load_single_document(docs: List[str], lang: str = LANG) -> pd.DataFrame:
 def parse_document(
     docs: List[str],
     lang: str = LANG,
-    strip_newlines: bool = False,
+    strip_newlines: bool = True,
 ) -> List[str]:
     if strip_newlines:
+        print(f"Stripping newlines from {len(docs)} documents.")
         docs = [d.replace("\n", "") for d in docs]
 
     def sentencize(text):
@@ -84,6 +85,8 @@ def load_and_cache_documents(uploaded_file):
     df = pd.DataFrame()
     if ext == "txt":
         uploaded_file = uploaded_file.read().decode("utf-8")
+        uploaded_file = uploaded_file.split("\n")
+        print(f"Loaded single document with {len(uploaded_file)} paragraphs.")
         df = load_single_document(uploaded_file)
     elif ext == "zip":
         with zipfile.ZipFile(uploaded_file, "r") as z:

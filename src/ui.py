@@ -33,6 +33,12 @@ default_queries = [
     "details about the murder weapon (what is the murder weapon?)",
     "the victim's involvement in conflict or argument prior to death",
 ]
+default_queries = [
+    "personer med opphold og tilknytning til adressen (åstedet) som eier, leietaker, besøkende osv",
+    "hvordan døde fornærmede (hva er dødsårsaken?)",
+    "detaljer om drapsvåpenet (hva er drapsvåpenet?)",
+    "fornærmedes (avdøde) involvering i konflikt eller krangel forut for døden",
+]
 
 # css hack to remove top header
 st.markdown(
@@ -77,8 +83,10 @@ with col1:
     st.write("### Data:")
     txt_upload = "Upload a single .txt file or a zip of multiple .txt files. The file names should have identifiable names for KriRAG to reference results."
 
-    _uploaded = st.file_uploader(txt_upload, type=["txt", "zip"], accept_multiple_files=False)
-        
+    _uploaded = st.file_uploader(
+        txt_upload, type=["txt", "zip"], accept_multiple_files=False
+    )
+
     if _uploaded:
         initialization = load_and_cache_documents(_uploaded)
 
@@ -92,7 +100,9 @@ with col1:
             )
 
         print(initialization.keys())
-        print(f"Initialization complete.\nData size: {initialization['num_pages']} pages, {initialization['num_sents']} sentences.")
+        print(
+            f"Initialization complete.\nData size: {initialization['num_pages']} pages, {initialization['num_sents']} sentences."
+        )
         st.session_state.is_initialized = True
 
 st.divider()
@@ -127,7 +137,9 @@ if st.session_state.is_initialized and "data" in initialization:
         st.session_state.rag_started = True
         with st.spinner("Analyzing..."):
             _, collection = populate_collection(
-                initialization["data"], collection_name=collection_name, delete=to_delete
+                initialization["data"],
+                collection_name=collection_name,
+                delete=to_delete,
             )
             rag_path = run_rag(
                 queries=queries,
