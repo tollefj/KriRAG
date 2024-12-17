@@ -90,7 +90,6 @@ def update_collection(
     DOCUMENTS_TEXT_COLUMN,
     DOCUMENTS_ID_COLUMN,
 ):
-    # check if there are items in the collection
     if collection.count() > 0:
         print(f"Collection has {collection.count()} items. Safe to continue :)")
     else:

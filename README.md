@@ -1,42 +1,68 @@
-# setup
+# KriRAG
 
-## server (docker)
+Code for the paper titled:
+_Enhancing Criminal Investigation Analysis with Summarization and Memory-based Retrieval-Augmented Generation: A Comprehensive Evaluation of Real Case Data_
+
+Results from manual evaluation are found in the [experiments](experiments/) directory.
+
+**Note: This study discusses case files that contain unsettling information and language pertaining to violent crimes.**
+
+![KriRAG UI](assets/1.png)
+![KriRAG UI and config](assets/2.png)
+![KriRAG UI and output](assets/3.png)
+![KriRAG UI and output](assets/4.png)
+
+
+## Installation
+
+### docker containers
+
+First, download the docker images (served as .tar files) through Zenodo.
+Links:
+
+
+
+The script below sets up two containers: the API and UI service.
 
 ```bash
-./docker/build.server.sh  # clones llama.cpp and builds from cuda dockerfile
+chmod +x run-krirag.sh
+./run-krirag.sh
+```
+
+### server-only docker container
+
+```bash
+./docker/build.server.sh
 ./docker/run.server.sh
 ```
 
-## frontend
+### frontend-only docker container
 
-### local installation
+```bash
+./docker/build.ui.sh 
+./docker/run.ui.sh
+```
+
+## local installation
+
+### llama.cpp server
+
+```bash
+git clone git@github.com:ggerganov/llama.cpp.git
+cd llama.cpp
+cmake -B build -DGGML_CUDA=ON
+cmake --build build --config Release
+# this assumes enough VRAM to offload all layers (rarely >~ 40) and 4096 context length
+./llama.cpp/llama-server -m <PATH/TO/MODEL.gguf> -ngl 100 -c 4096 --port 8052
+```
+
+### frontend
 
 ```bash
 cd src
+# requirements.cpu.txt if CUDA is unavailable
+# the SBERT model will use the openvino backend to offload the GPU memory.
 python -m pip install -r requirements.txt
 python install.py
 streamlit run ui.py
-```
-
-### docker
-
-./docker/build.ui.sh
-./docker/run.ui.sh
-
-```bash
-docker network create krirag-net
-#12029ebae1b1b18d4dabc105500e33fd8e57ddddbe0dadc733e451aa5ceb470b
-
-
-```
-
-# Notater
-
-```
-Det du kan nevne for utvikleren er at vi veldig gjerne kjører en reverse proxy foran containeren, og da bruker vi primært caddy (Web server). så veldig greit om ikke vedkommende hardkoder http:// i urler osv, men har støtte for både med og uten ssl/https
-
-vi hadde en et prosjekt fra samarbeidene land hvor alt bortsett fra en url funka med https, fordi det var hardkodet i html-koden i frontend
-
-
-
 ```

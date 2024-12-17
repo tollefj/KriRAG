@@ -28,17 +28,43 @@ from initialize import load_and_cache_documents, populate_collection
 from rag import run_rag
 
 default_queries = [
-    "persons with residence and connections to the address (the crime scene) as owner, tenant, visitor, etc.",
-    "how did the victim die (what is the cause of death?)",
-    "details about the murder weapon (what is the murder weapon?)",
-    "the victim's involvement in conflict or argument prior to death",
+    "some investigative query that attempts to figure out specific details about the case",
+    "example: 'persons with residence and connections to the address (the crime scene) as owner, tenant, visitor, etc.'",
+    "example: 'who was at the house between 10 and 12?'",
 ]
+
 default_queries = [
-    "personer med opphold og tilknytning til adressen (åstedet) som eier, leietaker, besøkende osv",
-    "hvordan døde fornærmede (hva er dødsårsaken?)",
-    "detaljer om drapsvåpenet (hva er drapsvåpenet?)",
-    "fornærmedes (avdøde) involvering i konflikt eller krangel forut for døden",
+    "what are the key takeaways?",
+    "who did what?",
+    "what was the outcomes?",
+    "were there any monetary settlements?",
 ]
+
+default_queries = [
+    "find the mentioned laws referenced in the case, along with all monetary settlements"
+]
+
+supported_languagess = [
+    'czech',
+    'danish',
+    'dutch',
+    'english',
+    'estonian',
+    'finnish',
+    'french',
+    'german',
+    'greek',
+    'italian',
+    'norwegian',
+    'polish',
+    'portuguese',
+    'russian',
+    'slovene',
+    'spanish',
+    'swedish',
+    'turkish',
+]
+default_lang = "english"
 
 # css hack to remove top header
 st.markdown(
@@ -55,7 +81,9 @@ st.markdown(
 st.title("KriRAG")
 subtext = "query-based analysis for criminal investigations"
 st.sidebar.header("Server Configuration")
-ip_address = st.sidebar.text_input("LLM Docker Name or IP Address", value="krirag-api")
+default_ip = "krirag-api"
+default_ip = "localhost"
+ip_address = st.sidebar.text_input("LLM Docker Name or IP Address", value=default_ip)
 port = st.sidebar.number_input("API Port", value=8502, step=1)
 
 # Add listeners for changes
@@ -77,18 +105,26 @@ if "is_initialized" not in st.session_state:
 if "rag_started" not in st.session_state:
     st.session_state.rag_started = False
 if "last_top_n" not in st.session_state:
-    st.session_state["last_top_n"] = 1
+    st.session_state.last_top_n = 1
+if "to_delete" not in st.session_state:
+    st.session_state.to_delete = False
 
 with col1:
     st.write("### Data:")
     txt_upload = "Upload a single .txt file or a zip of multiple .txt files. The file names should have identifiable names for KriRAG to reference results."
 
+    lang_selector = st.selectbox(
+        "Select language:",
+        supported_languagess,
+        index=supported_languagess.index(default_lang),
+    )
+    
     _uploaded = st.file_uploader(
         txt_upload, type=["txt", "zip"], accept_multiple_files=False
     )
 
     if _uploaded:
-        initialization = load_and_cache_documents(_uploaded)
+        initialization = load_and_cache_documents(_uploaded, lang=lang_selector)
 
         with col2:
             st.markdown("### Queries:")
@@ -112,8 +148,12 @@ if st.session_state.is_initialized and "data" in initialization:
         "Delete previously computed data (local database)",
         value=False,
     )
+    if st.session_state.to_delete != to_delete:
+        st.session_state.to_delete = to_delete
+        st.session_state.rag_started = False
+
     collection_name = (
-        st.text_input(label="Name of your experiment:", value="KriRAG experiment 1")
+        st.text_input(label="Name of your experiment:", value=_uploaded.name.split(".")[0])
         .replace(" ", "-")
         .lower()
     )
@@ -139,7 +179,7 @@ if st.session_state.is_initialized and "data" in initialization:
             _, collection = populate_collection(
                 initialization["data"],
                 collection_name=collection_name,
-                delete=to_delete,
+                delete=st.session_state.to_delete,
             )
             rag_path = run_rag(
                 queries=queries,
