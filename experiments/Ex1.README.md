@@ -1,1 +1,1 @@
-See `make_stats.ipynb` in the root directory.
+See `make_stats.ipynb` in the [/evaluation](/evaluation/make_stats.ipynb) directory.
